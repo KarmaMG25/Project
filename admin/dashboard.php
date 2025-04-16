@@ -103,8 +103,8 @@ $review_data = mysqli_fetch_array($review_result);
                     <div class="dropdown-menu" aria-labelledby="managementDropdown">
                         <a class="dropdown-item" href="categories/index.php">Manage Categories</a>
 
-                        <a class="dropdown-item" href="subcategories.php">Sub-Categories Management</a>
-                        <a class="dropdown-item" href="products.php">Products Management</a>
+                        <a class="dropdown-item" href="subcategories/subcategories.php">Sub-Categories Management</a>
+                        <a class="dropdown-item" href="products/products.php">Products Management</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -112,7 +112,7 @@ $review_data = mysqli_fetch_array($review_result);
                         Orders & Reports
                     </a>
                     <div class="dropdown-menu" aria-labelledby="ordersDropdown">
-                        <a class="dropdown-item" href="orders.php">Orders Management</a>
+                        <a class="dropdown-item" href="orders/order.php">Orders Management</a>
                         <a class="dropdown-item" href="reports.php">Reports</a>
                         <a class="dropdown-item" href="search_orders.php">Search Orders</a>
                     </div>
