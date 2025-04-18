@@ -24,25 +24,6 @@ while ($item = $cartItems->fetch_assoc()) {
     $total_price += $total;
     $items[] = $item;
 }
-
-// Handle checkout form
-if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($items)) {
-    $stmt = $conn->prepare("INSERT INTO orders (user_id, total_price) VALUES (?, ?)");
-    $stmt->bind_param("id", $userId, $total_price);
-    $stmt->execute();
-    $orderId = $stmt->insert_id;
-
-    foreach ($items as $item) {
-        $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiid", $orderId, $item['product_id'], $item['quantity'], $item['price']);
-        $stmt->execute();
-    }
-
-    $conn->query("DELETE FROM cart WHERE user_id = $userId");
-
-    header("Location: order_success.php");
-    exit();
-}
 ?>
 
 <?php include 'user_template/header.php'; ?>
@@ -50,7 +31,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($items)) {
 <h2 class="text-center mb-4">Confirm Your Order</h2>
 
 <?php if (!empty($items)): ?>
-<form method="post" action="">
   <div class="table-responsive">
     <table class="table table-bordered align-middle text-center">
       <thead class="table-light">
@@ -78,10 +58,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($items)) {
     </table>
   </div>
 
-  <div class="text-end">
-    <button type="submit" class="btn btn-success">Place Order</button>
+  <!-- ✅ Stripe Payment Button -->
+  <div class="text-end mt-4">
+    <button id="checkout-button" class="btn btn-success px-4">Pay with Card</button>
   </div>
-</form>
+
+  <!-- ✅ Stripe JS -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    const stripe = Stripe("pk_test_51RFMQ6PsY7SQKpLPpc7sWuALAbGhvynuBwbZXGShLUUhjGSUwdlJLgTMOLUz7ac29dkLJvxavU7GlHYoy0De8az500t1zOJJ6U");
+
+    document.getElementById("checkout-button").addEventListener("click", function () {
+      fetch("create-checkout-session.php", {
+        method: "POST"
+      })
+      .then(res => res.json())
+      .then(data => {
+        return stripe.redirectToCheckout({ sessionId: data.id });
+      });
+    });
+  </script>
 <?php else: ?>
   <p class="text-center text-muted">Your cart is empty.</p>
 <?php endif; ?>

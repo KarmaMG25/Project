@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 include '../include/db.php';
 $userId = $_SESSION['user_id'];
 
-// Fetch all orders for this user
+// Fetch user's orders
 $orders = $conn->query("SELECT * FROM orders WHERE user_id = $userId ORDER BY created_at DESC");
 ?>
 
@@ -20,23 +20,23 @@ $orders = $conn->query("SELECT * FROM orders WHERE user_id = $userId ORDER BY cr
   <div class="accordion" id="ordersAccordion">
     <?php $i = 0; while ($order = $orders->fetch_assoc()): ?>
       <?php
-        // Handle status display color
         $status = $order['status'];
         $badgeClass = match ($status) {
-            'Processing' => 'bg-info',
-            'Shipped'    => 'bg-warning',
-            'Delivered'  => 'bg-success',
-            'Cancelled'  => 'bg-danger',
-            default      => 'bg-secondary'
+          'Processing' => 'bg-info',
+          'Shipped'    => 'bg-warning',
+          'Delivered'  => 'bg-success',
+          'Cancelled'  => 'bg-danger',
+          default      => 'bg-secondary'
         };
+        $orderId = $order['id'];
       ?>
       <div class="accordion-item mb-3">
         <h2 class="accordion-header" id="heading<?= $i ?>">
           <button class="accordion-button <?= $i > 0 ? 'collapsed' : '' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $i ?>" aria-expanded="<?= $i === 0 ? 'true' : 'false' ?>" aria-controls="collapse<?= $i ?>">
-            Order #<?= $order['id'] ?>
-            &nbsp; | &nbsp; $<?= number_format($order['total_price'], 2) ?>
-            &nbsp; | &nbsp; <?= date("F j, Y, g:i A", strtotime($order['created_at'])) ?>
-            &nbsp; | &nbsp; <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span>
+            Order #<?= $orderId ?> &nbsp; | &nbsp;
+            $<?= number_format($order['total_price'], 2) ?> &nbsp; | &nbsp;
+            <?= date("F j, Y, g:i A", strtotime($order['created_at'])) ?> &nbsp; | &nbsp;
+            <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span>
           </button>
         </h2>
         <div id="collapse<?= $i ?>" class="accordion-collapse collapse <?= $i === 0 ? 'show' : '' ?>" aria-labelledby="heading<?= $i ?>" data-bs-parent="#ordersAccordion">
@@ -52,19 +52,18 @@ $orders = $conn->query("SELECT * FROM orders WHERE user_id = $userId ORDER BY cr
               </thead>
               <tbody>
                 <?php
-                  $order_id = $order['id'];
                   $items = $conn->query("
                     SELECT oi.*, p.name, p.image 
                     FROM order_items oi 
                     JOIN products p ON oi.product_id = p.id 
-                    WHERE oi.order_id = $order_id
+                    WHERE oi.order_id = $orderId
                   ");
                   while ($item = $items->fetch_assoc()):
                     $subtotal = $item['quantity'] * $item['price'];
                 ?>
                 <tr>
                   <td class="text-start">
-                    <img src="../uploads/<?= htmlspecialchars($item['image']) ?>" alt="" width="60" height="60" class="me-2" style="object-fit:cover;">
+                    <img src="../uploads/<?= htmlspecialchars($item['image']) ?>" width="60" height="60" style="object-fit:cover;" class="me-2">
                     <?= htmlspecialchars($item['name']) ?>
                   </td>
                   <td><?= $item['quantity'] ?></td>
@@ -75,11 +74,9 @@ $orders = $conn->query("SELECT * FROM orders WHERE user_id = $userId ORDER BY cr
               </tbody>
             </table>
 
-            <!-- ✅ View Details Button -->
+            <!-- Optional: View full invoice or details -->
             <div class="text-end mt-3">
-              <a href="order_details.php?id=<?= $order['id'] ?>" class="btn btn-sm btn-outline-primary">
-                View Full Details
-              </a>
+              <a href="order_details.php?id=<?= $orderId ?>" class="btn btn-sm btn-outline-primary">View Details</a>
             </div>
           </div>
         </div>
