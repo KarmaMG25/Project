@@ -2,3 +2,5 @@
 .env
 *.log
 composer.lock
+
+/include/stripe_config.php
