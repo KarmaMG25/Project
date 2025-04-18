@@ -1,33 +1,57 @@
-<?php include 'user_template/public_header.php'; ?>
+<?php
+session_start();
+include '../include/db.php';
+
+$success = '';
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $message = trim($_POST['message']);
+
+    if (!empty($name) && !empty($email) && !empty($message)) {
+        $stmt = $conn->prepare("INSERT INTO inquiries (name, email, message) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $name, $email, $message);
+        if ($stmt->execute()) {
+            $success = "Your message has been sent.";
+        } else {
+            $error = "Something went wrong.";
+        }
+    } else {
+        $error = "Please fill out all fields.";
+    }
+}
+?>
+
+<?php include 'user_template/header.php'; ?>
 
 <div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <h1 class="text-center mb-4">Contact Us</h1>
-      <p class="text-center">Have a question, feedback, or just want to say hello? Fill out the form below and our team will get back to you shortly.</p>
+  <h2 class="mb-4 text-center">Contact Us</h2>
 
-      <form>
-        <div class="mb-3">
-          <label for="name" class="form-label">Your Name</label>
-          <input type="text" id="name" class="form-control" required>
-        </div>
+  <?php if ($success): ?>
+    <div class="alert alert-success"><?= $success ?></div>
+  <?php elseif ($error): ?>
+    <div class="alert alert-danger"><?= $error ?></div>
+  <?php endif; ?>
 
-        <div class="mb-3">
-          <label for="email" class="form-label">Your Email</label>
-          <input type="email" id="email" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-          <label for="message" class="form-label">Message</label>
-          <textarea id="message" rows="5" class="form-control" required></textarea>
-        </div>
-
-        <div class="d-grid">
-          <button type="submit" class="btn btn-primary">Send Message</button>
-        </div>
-      </form>
+  <form method="POST" action="">
+    <div class="mb-3">
+      <label class="form-label">Your Name</label>
+      <input type="text" name="name" class="form-control" required>
     </div>
-  </div>
+    <div class="mb-3">
+      <label class="form-label">Email Address</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Message</label>
+      <textarea name="message" rows="5" class="form-control" required></textarea>
+    </div>
+    <div class="text-end">
+      <button type="submit" class="btn btn-primary px-4">Send Message</button>
+    </div>
+  </form>
 </div>
 
-<?php include 'user_template/public_footer.php'; ?>
+<?php include 'user_template/footer.php'; ?>

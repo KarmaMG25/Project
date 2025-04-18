@@ -21,13 +21,15 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="products.php">Products</a></li>
-          <li class="nav-item"><a class="nav-link" href="cart.php">Cart</a></li>
-          <li class="nav-item"><a class="nav-link" href="wishlist.php">Wishlist</a></li>
-          <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
-          <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
-        </ul>
+      <ul class="navbar-nav ms-auto">
+      <li class="nav-item"><a class="nav-link" href="products.php">Products</a></li>
+      <li class="nav-item"><a class="nav-link" href="cart.php">Cart</a></li>
+      <li class="nav-item"><a class="nav-link" href="wishlist.php">Wishlist</a></li>
+      <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
+      <li class="nav-item"><a class="nav-link" href="report.php">Report</a></li> <!-- ✅ Added -->
+      <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
+      </ul>
+
       </div>
     </div>
   </nav>
