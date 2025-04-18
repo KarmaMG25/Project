@@ -1,47 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Contact Us - Angus & Coote</title>
-    <link rel="stylesheet" href="../Style/user_login.css">
-    <style>
-        .container {
-            max-width: 800px;
-            margin: auto;
-            padding: 40px;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: #333;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Contact Us</h1>
-        <form>
-            <label for="name">Your Name:</label>
-            <input type="text" id="name" required>
+<?php include 'user_template/public_header.php'; ?>
 
-            <label for="email">Your Email:</label>
-            <input type="email" id="email" required>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h1 class="text-center mb-4">Contact Us</h1>
+      <p class="text-center">Have a question, feedback, or just want to say hello? Fill out the form below and our team will get back to you shortly.</p>
 
-            <label for="message">Message:</label>
-            <textarea id="message" rows="5" required></textarea>
+      <form>
+        <div class="mb-3">
+          <label for="name" class="form-label">Your Name</label>
+          <input type="text" id="name" class="form-control" required>
+        </div>
 
-            <button type="submit" onclick="alert('Message submitted!')">Send Message</button>
-        </form>
+        <div class="mb-3">
+          <label for="email" class="form-label">Your Email</label>
+          <input type="email" id="email" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="message" class="form-label">Message</label>
+          <textarea id="message" rows="5" class="form-control" required></textarea>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </div>
+      </form>
     </div>
-</body>
-</html>
+  </div>
+</div>
+
+<?php include 'user_template/public_footer.php'; ?>

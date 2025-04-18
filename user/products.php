@@ -2,11 +2,16 @@
 session_start();
 include_once("../include/db.php");
 
-// Fetch categories and subcategories for filters
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Fetch filters
 $categories = $conn->query("SELECT * FROM categories");
 $subcategories = $conn->query("SELECT * FROM subcategories");
 
-// Build WHERE clause based on filters
+// Build WHERE clause
 $where = "WHERE 1";
 if (!empty($_GET['search'])) {
     $search = $conn->real_escape_string($_GET['search']);
@@ -21,7 +26,7 @@ if (!empty($_GET['subcategory'])) {
     $where .= " AND p.subcategory_id = $subcat";
 }
 
-// Fetch filtered products
+// Get products
 $products = $conn->query("SELECT p.*, c.name AS category, s.name AS subcategory 
                           FROM products p 
                           LEFT JOIN categories c ON p.category_id = c.id 
@@ -29,113 +34,67 @@ $products = $conn->query("SELECT p.*, c.name AS category, s.name AS subcategory
                           $where");
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Products</title>
-    <style>
-        body {
-            font-family: Arial;
-            padding: 20px;
-        }
+<?php include 'user_template/header.php'; ?>
 
-        .filter-form {
-            margin-bottom: 20px;
-        }
+<h2 class="text-center mb-4">Browse Our Jewellery</h2>
 
-        .product-card {
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            text-align: center;
-        }
+<!-- Search & Filter Form -->
+<form method="GET" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <input type="text" name="search" class="form-control" placeholder="Search products..." 
+           value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+  </div>
 
-        .product-card img {
-            max-width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
+  <div class="col-md-3">
+    <select name="category" class="form-select">
+      <option value="">All Categories</option>
+      <?php while($cat = $categories->fetch_assoc()): ?>
+        <option value="<?= $cat['id'] ?>" <?= (isset($_GET['category']) && $_GET['category'] == $cat['id']) ? 'selected' : '' ?>>
+          <?= htmlspecialchars($cat['name']) ?>
+        </option>
+      <?php endwhile; ?>
+    </select>
+  </div>
 
-        .product-card h3 {
-            margin-top: 10px;
-        }
+  <div class="col-md-3">
+    <select name="subcategory" class="form-select">
+      <option value="">All Subcategories</option>
+      <?php while($sub = $subcategories->fetch_assoc()): ?>
+        <option value="<?= $sub['id'] ?>" <?= (isset($_GET['subcategory']) && $_GET['subcategory'] == $sub['id']) ? 'selected' : '' ?>>
+          <?= htmlspecialchars($sub['name']) ?>
+        </option>
+      <?php endwhile; ?>
+    </select>
+  </div>
 
-        .product-card p {
-            margin: 5px 0;
-        }
+  <div class="col-md-2 d-grid">
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </div>
+</form>
 
-        .product-card button {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin: 5px;
-        }
-
-        .product-card button:hover {
-            background-color: #555;
-        }
-    </style>
-</head>
-<body>
-    <h2>Browse Products</h2>
-
-    <form method="GET" class="filter-form">
-        <input type="text" name="search" placeholder="Search products..." 
-               value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-
-        <select name="category">
-            <option value="">All Categories</option>
-            <?php while($cat = $categories->fetch_assoc()): ?>
-                <option value="<?= $cat['id'] ?>" 
-                    <?= (isset($_GET['category']) && $_GET['category'] == $cat['id']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($cat['name']) ?>
-                </option>
-            <?php endwhile; ?>
-        </select>
-
-        <select name="subcategory">
-            <option value="">All Subcategories</option>
-            <?php while($sub = $subcategories->fetch_assoc()): ?>
-                <option value="<?= $sub['id'] ?>" 
-                    <?= (isset($_GET['subcategory']) && $_GET['subcategory'] == $sub['id']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($sub['name']) ?>
-                </option>
-            <?php endwhile; ?>
-        </select>
-
-        <button type="submit">Filter</button>
-    </form>
-
-    <?php if ($products->num_rows > 0): ?>
-        <div class="product-list">
-            <?php while($row = $products->fetch_assoc()): ?>
-                <div class="product-card">
-                    <img src="../uploads/<?= htmlspecialchars($row['image']) ?>" alt="<?= htmlspecialchars($row['name']) ?>">
-                    <h3><?= htmlspecialchars($row['name']) ?></h3>
-                    <p><?= htmlspecialchars($row['description']) ?></p>
-                    <p>Category: <?= htmlspecialchars($row['category']) ?> | 
-                       Subcategory: <?= htmlspecialchars($row['subcategory']) ?></p>
-                    <p>Price: $<?= number_format($row['price'], 2) ?></p>
-
-                    <!-- Add to Cart -->
-                    <a href="add_to_cart.php?product_id=<?= $row['id'] ?>">
-                        <button>Add to Cart</button>
-                    </a>
-
-                    <!-- Add to Wishlist -->
-                    <a href="add_to_wishlist.php?id=<?= $row['id'] ?>">
-                        <button>Add to Wishlist</button>
-                    </a>
-                </div>
-            <?php endwhile; ?>
+<!-- Product Cards -->
+<?php if ($products->num_rows > 0): ?>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+    <?php while($row = $products->fetch_assoc()): ?>
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <img src="../uploads/<?= htmlspecialchars($row['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($row['name']) ?>" style="height: 200px; object-fit: cover;">
+          <div class="card-body">
+            <h5 class="card-title"><?= htmlspecialchars($row['name']) ?></h5>
+            <p class="card-text small"><?= htmlspecialchars($row['description']) ?></p>
+            <p class="mb-2"><strong>$<?= number_format($row['price'], 2) ?></strong></p>
+            <p class="text-muted small"><?= htmlspecialchars($row['category']) ?> > <?= htmlspecialchars($row['subcategory']) ?></p>
+            <div class="d-grid gap-2">
+              <a href="add_to_cart.php?product_id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">Add to Cart</a>
+              <a href="add_to_wishlist.php?id=<?= $row['id'] ?>" class="btn btn-outline-dark btn-sm">Add to Wishlist</a>
+            </div>
+          </div>
         </div>
-    <?php else: ?>
-        <p>No products found.</p>
-    <?php endif; ?>
-</body>
-</html>
+      </div>
+    <?php endwhile; ?>
+  </div>
+<?php else: ?>
+  <p class="text-center">No products found.</p>
+<?php endif; ?>
+
+<?php include 'user_template/footer.php'; ?>

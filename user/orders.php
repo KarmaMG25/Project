@@ -1,87 +1,93 @@
 <?php
 session_start();
-include_once("../include/db.php");
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
+include '../include/db.php';
 $userId = $_SESSION['user_id'];
 
-// Fetch all orders for the logged-in user
-$query = "SELECT * FROM orders WHERE user_id = $userId ORDER BY created_at DESC";
-$result = $conn->query($query);
+// Fetch all orders for this user
+$orders = $conn->query("SELECT * FROM orders WHERE user_id = $userId ORDER BY created_at DESC");
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Orders</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        h2 {
-            text-align: center;
-        }
-        table {
-            width: 90%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        th {
-            background-color: #333;
-            color: white;
-        }
-        tr:hover {
-            background-color: #f2f2f2;
-        }
-        a.button {
-            background-color: #333;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            text-decoration: none;
-        }
-        a.button:hover {
-            background-color: #555;
-        }
-    </style>
-</head>
-<body>
+<?php include 'user_template/header.php'; ?>
 
-<h2>My Orders</h2>
+<h2 class="text-center mb-4">My Orders</h2>
 
-<table>
-    <tr>
-        <th>Order ID</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th>Total ($)</th>
-        <th>Actions</th>
-    </tr>
-    <?php if ($result->num_rows > 0): ?>
-        <?php while ($order = $result->fetch_assoc()): ?>
-            <tr>
-                <td><?= $order['id'] ?></td>
-                <td><?= date("Y-m-d", strtotime($order['created_at'])) ?></td>
-                <td><?= $order['status'] ?></td>
-                <td><?= number_format($order['total_price'], 2) ?></td>
-                <td><a class="button" href="order_details.php?id=<?= $order['id'] ?>">View</a></td>
-            </tr>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <tr>
-            <td colspan="5">You have no orders yet.</td>
-        </tr>
-    <?php endif; ?>
-</table>
+<?php if ($orders->num_rows > 0): ?>
+  <div class="accordion" id="ordersAccordion">
+    <?php $i = 0; while ($order = $orders->fetch_assoc()): ?>
+      <?php
+        // Handle status display color
+        $status = $order['status'];
+        $badgeClass = match ($status) {
+            'Processing' => 'bg-info',
+            'Shipped'    => 'bg-warning',
+            'Delivered'  => 'bg-success',
+            'Cancelled'  => 'bg-danger',
+            default      => 'bg-secondary'
+        };
+      ?>
+      <div class="accordion-item mb-3">
+        <h2 class="accordion-header" id="heading<?= $i ?>">
+          <button class="accordion-button <?= $i > 0 ? 'collapsed' : '' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $i ?>" aria-expanded="<?= $i === 0 ? 'true' : 'false' ?>" aria-controls="collapse<?= $i ?>">
+            Order #<?= $order['id'] ?>
+            &nbsp; | &nbsp; $<?= number_format($order['total_price'], 2) ?>
+            &nbsp; | &nbsp; <?= date("F j, Y, g:i A", strtotime($order['created_at'])) ?>
+            &nbsp; | &nbsp; <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span>
+          </button>
+        </h2>
+        <div id="collapse<?= $i ?>" class="accordion-collapse collapse <?= $i === 0 ? 'show' : '' ?>" aria-labelledby="heading<?= $i ?>" data-bs-parent="#ordersAccordion">
+          <div class="accordion-body">
+            <table class="table table-bordered text-center align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                  $order_id = $order['id'];
+                  $items = $conn->query("
+                    SELECT oi.*, p.name, p.image 
+                    FROM order_items oi 
+                    JOIN products p ON oi.product_id = p.id 
+                    WHERE oi.order_id = $order_id
+                  ");
+                  while ($item = $items->fetch_assoc()):
+                    $subtotal = $item['quantity'] * $item['price'];
+                ?>
+                <tr>
+                  <td class="text-start">
+                    <img src="../uploads/<?= htmlspecialchars($item['image']) ?>" alt="" width="60" height="60" class="me-2" style="object-fit:cover;">
+                    <?= htmlspecialchars($item['name']) ?>
+                  </td>
+                  <td><?= $item['quantity'] ?></td>
+                  <td>$<?= number_format($item['price'], 2) ?></td>
+                  <td>$<?= number_format($subtotal, 2) ?></td>
+                </tr>
+                <?php endwhile; ?>
+              </tbody>
+            </table>
 
-</body>
-</html>
+            <!-- ✅ View Details Button -->
+            <div class="text-end mt-3">
+              <a href="order_details.php?id=<?= $order['id'] ?>" class="btn btn-sm btn-outline-primary">
+                View Full Details
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <?php $i++; endwhile; ?>
+  </div>
+<?php else: ?>
+  <p class="text-center text-muted">You haven't placed any orders yet.</p>
+<?php endif; ?>
+
+<?php include 'user_template/footer.php'; ?>

@@ -1,57 +1,73 @@
 <?php
 session_start();
-include_once("../include/db.php");
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-$userId = $_SESSION['user_id'];
+include '../include/db.php';
 
-$sql = "SELECT c.id, c.quantity, p.name, p.price, p.image 
-        FROM cart c 
-        JOIN products p ON c.product_id = p.id 
-        WHERE c.user_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $userId);
+$user_id = $_SESSION['user_id'];
+
+$query = "SELECT c.id as cart_id, p.id as product_id, p.name, p.price, p.image, c.quantity
+          FROM cart c
+          JOIN products p ON c.product_id = p.id
+          WHERE c.user_id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $total = 0;
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>My Cart</title>
-    <link href="../Style/user_login.css" rel="stylesheet">
-</head>
-<body>
-    <h2>Your Cart</h2>
-    <table border="1" cellpadding="10">
-        <tr>
-            <th>Product</th><th>Price</th><th>Quantity</th><th>Total</th><th>Action</th>
-        </tr>
-        <?php while ($row = $result->fetch_assoc()): 
-            $subtotal = $row['price'] * $row['quantity'];
-            $total += $subtotal;
-        ?>
-        <tr>
-            <td><?php echo $row['name']; ?></td>
-            <td>$<?php echo number_format($row['price'], 2); ?></td>
-            <td><?php echo $row['quantity']; ?></td>
-            <td>$<?php echo number_format($subtotal, 2); ?></td>
-            <td><a href="remove_from_cart.php?id=<?php echo $row['id']; ?>">Remove</a></td>
-        </tr>
-        <?php endwhile; ?>
-        <tr>
-            <td colspan="3" align="right"><strong>Total:</strong></td>
-            <td colspan="2">$<?php echo number_format($total, 2); ?></td>
-        </tr>
-    </table>
+<?php include 'user_template/header.php'; ?>
 
-    <br><a href="checkout.php">Proceed to Checkout</a>
-</body>
-</html>
+<h2 class="text-center mb-4">My Cart</h2>
+
+<?php if ($result->num_rows > 0): ?>
+  <div class="table-responsive">
+    <table class="table align-middle table-bordered">
+    <thead class="table-light text-center">
+  <tr>
+    <th>Product</th>
+    <th>Name</th>
+    <th>Price</th>
+    <th>Qty</th>
+    <th>Subtotal</th>
+    <th>Action</th>
+  </tr>
+</thead>
+<tbody>
+  <?php while($row = $result->fetch_assoc()): 
+    $subtotal = $row['price'] * $row['quantity'];
+    $total += $subtotal;
+  ?>
+  <tr class="text-center">
+    <td class="text-start">
+      <img src="../uploads/<?= htmlspecialchars($row['image']) ?>" alt="" width="80" height="80" style="object-fit:cover;">
+    </td>
+    <td><?= htmlspecialchars($row['name']) ?></td>
+    <td>$<?= number_format($row['price'], 2) ?></td>
+    <td><?= $row['quantity'] ?></td>
+    <td>$<?= number_format($subtotal, 2) ?></td>
+    <td>
+      <a href="remove_from_cart.php?cart_id=<?= $row['cart_id'] ?>" class="btn btn-sm btn-outline-danger">Remove</a>
+    </td>
+  </tr>
+  <?php endwhile; ?>
+</tbody>
+
+    </table>
+  </div>
+
+  <div class="text-end mt-4">
+    <h5>Total: <strong>$<?= number_format($total, 2) ?></strong></h5>
+    <a href="checkout.php" class="btn btn-primary mt-2">Proceed to Checkout</a>
+  </div>
+
+<?php else: ?>
+  <p class="text-center">Your cart is empty.</p>
+<?php endif; ?>
+
+<?php include 'user_template/footer.php'; ?>
