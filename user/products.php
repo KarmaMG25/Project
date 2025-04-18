@@ -36,7 +36,7 @@ $products = $conn->query("SELECT p.*, c.name AS category, s.name AS subcategory
 
 <?php include 'user_template/header.php'; ?>
 
-<h2 class="text-center mb-4">Browse Our Jewellery</h2>
+<h2 class="text-center mb-4">🛍️ Browse Our Jewellery</h2>
 
 <!-- Search & Filter Form -->
 <form method="GET" class="row g-3 mb-4">
@@ -74,19 +74,28 @@ $products = $conn->query("SELECT p.*, c.name AS category, s.name AS subcategory
 
 <!-- Product Cards -->
 <?php if ($products->num_rows > 0): ?>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
     <?php while($row = $products->fetch_assoc()): ?>
-      <div class="col">
-        <div class="card h-100 shadow-sm">
-          <img src="../uploads/<?= htmlspecialchars($row['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($row['name']) ?>" style="height: 200px; object-fit: cover;">
-          <div class="card-body">
-            <h5 class="card-title"><?= htmlspecialchars($row['name']) ?></h5>
-            <p class="card-text small"><?= htmlspecialchars($row['description']) ?></p>
-            <p class="mb-2"><strong>$<?= number_format($row['price'], 2) ?></strong></p>
-            <p class="text-muted small"><?= htmlspecialchars($row['category']) ?> > <?= htmlspecialchars($row['subcategory']) ?></p>
-            <div class="d-grid gap-2">
-              <a href="add_to_cart.php?product_id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">Add to Cart</a>
-              <a href="add_to_wishlist.php?id=<?= $row['id'] ?>" class="btn btn-outline-dark btn-sm">Add to Wishlist</a>
+      <div class="col d-flex justify-content-center">
+        <div class="card h-100 shadow-sm" style="width: 100%;">
+          <img src="images/<?= htmlspecialchars($row['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($row['name']) ?>" style="height: 220px; object-fit: cover;">
+          <div class="card-body d-flex flex-column justify-content-between text-center">
+            <div>
+              <h5 class="card-title"><?= htmlspecialchars($row['name']) ?></h5>
+              <p class="card-text small"><?= htmlspecialchars($row['description']) ?></p>
+              <p class="mb-1"><strong>$<?= number_format($row['price'], 2) ?></strong></p>
+              <p class="text-muted small mb-2"><?= htmlspecialchars($row['category']) ?> > <?= htmlspecialchars($row['subcategory']) ?></p>
+            </div>
+
+            <!-- Centered Buttons -->
+            <div class="d-flex flex-column align-items-center gap-2 mt-3">
+              <form method="POST" action="add_to_cart.php">
+                <input type="hidden" name="product_id" value="<?= $row['id'] ?>">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" name="add_to_cart" class="btn btn-sm btn-primary">Shop Now</button>
+              </form>
+
+              <a href="add_to_wishlist.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-outline-dark">Add to Wishlist</a>
             </div>
           </div>
         </div>
@@ -94,7 +103,7 @@ $products = $conn->query("SELECT p.*, c.name AS category, s.name AS subcategory
     <?php endwhile; ?>
   </div>
 <?php else: ?>
-  <p class="text-center">No products found.</p>
+  <p class="text-center text-muted">No products found.</p>
 <?php endif; ?>
 
 <?php include 'user_template/footer.php'; ?>

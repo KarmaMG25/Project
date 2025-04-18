@@ -21,19 +21,28 @@ $results = $stmt->get_result();
 
 <?php include 'user_template/header.php'; ?>
 
-<h2 class="text-center mb-4">My Wishlist</h2>
+<h2 class="text-center mb-4">💖 My Wishlist</h2>
 
 <?php if ($results->num_rows > 0): ?>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
     <?php while($row = $results->fetch_assoc()): ?>
       <div class="col">
         <div class="card h-100 shadow-sm">
-          <img src="../uploads/<?= htmlspecialchars($row['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($row['name']) ?>" style="height: 200px; object-fit: cover;">
+          <div class="d-flex justify-content-center align-items-center" style="height: 200px; overflow: hidden;">
+            <img src="images/<?= htmlspecialchars($row['image']) ?>" 
+                 class="card-img-top" 
+                 alt="<?= htmlspecialchars($row['name']) ?>" 
+                 style="height: 100%; width: auto; object-fit: contain;">
+          </div>
           <div class="card-body text-center">
             <h5 class="card-title"><?= htmlspecialchars($row['name']) ?></h5>
             <p class="card-text"><strong>$<?= number_format($row['price'], 2) ?></strong></p>
             <div class="d-grid gap-2">
-              <a href="add_to_cart.php?product_id=<?= $row['product_id'] ?>" class="btn btn-primary btn-sm">Add to Cart</a>
+              <form method="POST" action="add_to_cart.php">
+                <input type="hidden" name="product_id" value="<?= $row['product_id'] ?>">
+                <input type="hidden" name="quantity" value="1">
+                <button type="submit" name="add_to_cart" class="btn btn-primary btn-sm">Add to Cart</button>
+              </form>
               <a href="remove_from_wishlist.php?id=<?= $row['wishlist_id'] ?>" class="btn btn-outline-danger btn-sm">Remove</a>
             </div>
           </div>

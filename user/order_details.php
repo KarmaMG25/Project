@@ -19,8 +19,8 @@ if ($orderCheck->num_rows == 0) {
     exit();
 }
 
-// Fetch order items
-$sql = "SELECT oi.quantity, p.name, p.price 
+// Fetch order items with images
+$sql = "SELECT oi.quantity, p.name, p.price, p.image 
         FROM order_items oi 
         JOIN products p ON oi.product_id = p.id 
         WHERE oi.order_id = $orderId";
@@ -34,10 +34,10 @@ $result = $conn->query($sql);
   <h2 class="text-center mb-4">Order #<?= $orderId ?> Details</h2>
 
   <div class="table-responsive">
-    <table class="table table-bordered text-center align-middle">
+    <table class="table table-bordered align-middle text-center">
       <thead class="table-light">
         <tr>
-          <th>Product</th>
+          <th class="text-start">Product</th>
           <th>Qty</th>
           <th>Price</th>
           <th>Subtotal</th>
@@ -50,7 +50,14 @@ $result = $conn->query($sql);
           $grand += $total;
         ?>
         <tr>
-          <td><?= htmlspecialchars($item['name']) ?></td>
+          <td class="text-start d-flex align-items-center gap-3">
+            <img src="images/<?= htmlspecialchars($item['image']) ?>" 
+                 width="60" height="60" 
+                 class="rounded shadow-sm" 
+                 style="object-fit: cover;" 
+                 alt="<?= htmlspecialchars($item['name']) ?>">
+            <?= htmlspecialchars($item['name']) ?>
+          </td>
           <td><?= $item['quantity'] ?></td>
           <td>$<?= number_format($item['price'], 2) ?></td>
           <td>$<?= number_format($total, 2) ?></td>
@@ -64,14 +71,14 @@ $result = $conn->query($sql);
     </table>
   </div>
 
-  <!-- ✅ Download Invoice Button -->
+  <!-- ✅ Download Invoice -->
   <div class="text-end mt-3">
     <a href="generate_invoice.php?id=<?= $orderId ?>" class="btn btn-outline-success">
       Download Invoice (PDF)
     </a>
   </div>
 
-  <!-- ✅ Back Button -->
+  <!-- ✅ Back to Orders -->
   <div class="text-end mt-4">
     <a href="orders.php" class="btn btn-outline-secondary">&larr; Back to Orders</a>
   </div>

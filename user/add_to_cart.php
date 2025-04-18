@@ -38,4 +38,8 @@ if (isset($_GET['product_id'])) {
 } else {
     echo "Invalid product.";
 }
+
+// At bottom of add_to_cart.php
+header("Location: cart.php");
+exit();
 ?>

@@ -41,10 +41,10 @@ $orders = $conn->query("SELECT * FROM orders WHERE user_id = $userId ORDER BY cr
         </h2>
         <div id="collapse<?= $i ?>" class="accordion-collapse collapse <?= $i === 0 ? 'show' : '' ?>" aria-labelledby="heading<?= $i ?>" data-bs-parent="#ordersAccordion">
           <div class="accordion-body">
-            <table class="table table-bordered text-center align-middle">
+            <table class="table table-bordered align-middle text-center">
               <thead class="table-light">
                 <tr>
-                  <th>Product</th>
+                  <th class="text-start">Product</th>
                   <th>Quantity</th>
                   <th>Price</th>
                   <th>Subtotal</th>
@@ -62,9 +62,13 @@ $orders = $conn->query("SELECT * FROM orders WHERE user_id = $userId ORDER BY cr
                     $subtotal = $item['quantity'] * $item['price'];
                 ?>
                 <tr>
-                  <td class="text-start">
-                    <img src="../uploads/<?= htmlspecialchars($item['image']) ?>" width="60" height="60" style="object-fit:cover;" class="me-2">
-                    <?= htmlspecialchars($item['name']) ?>
+                  <td class="text-start d-flex align-items-center gap-3">
+                    <img src="images/<?= htmlspecialchars($item['image']) ?>"
+                         width="60" height="60"
+                         style="object-fit: cover;"
+                         class="rounded shadow-sm"
+                         alt="<?= htmlspecialchars($item['name']) ?>">
+                    <span><?= htmlspecialchars($item['name']) ?></span>
                   </td>
                   <td><?= $item['quantity'] ?></td>
                   <td>$<?= number_format($item['price'], 2) ?></td>
@@ -74,7 +78,6 @@ $orders = $conn->query("SELECT * FROM orders WHERE user_id = $userId ORDER BY cr
               </tbody>
             </table>
 
-            <!-- Optional: View full invoice or details -->
             <div class="text-end mt-3">
               <a href="order_details.php?id=<?= $orderId ?>" class="btn btn-sm btn-outline-primary">View Details</a>
             </div>
