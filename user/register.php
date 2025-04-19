@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../include/db.php'; // ✅ Database connection
+include '../include/db.php';
 
 $success = false;
 $error = '';
@@ -8,11 +8,11 @@ $error = '';
 if (isset($_POST['register'])) {
     $name     = trim($_POST['name']);
     $email    = trim($_POST['email']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // ✅ Secure hash
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $phone    = trim($_POST['phone']);
     $address  = trim($_POST['address']);
 
-    // Check if email already exists
+    // Check if email exists
     $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -21,7 +21,6 @@ if (isset($_POST['register'])) {
     if ($stmt->num_rows > 0) {
         $error = "An account with this email already exists.";
     } else {
-        // Insert new user with optional fields
         $stmt = $conn->prepare("INSERT INTO users (name, email, password, phone, address) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $name, $email, $password, $phone, $address);
         if ($stmt->execute()) {
@@ -36,6 +35,18 @@ if (isset($_POST['register'])) {
 
 <?php include 'user_template/public_header.php'; ?>
 
+<!-- ✅ Background Style -->
+<style>
+  body {
+    background: url('../include/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+  }
+  .card {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+</style>
+
+<!-- ✅ Registration Form -->
 <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
   <div class="card p-4 shadow-sm" style="min-width: 350px; max-width: 500px; width: 100%;">
     <h4 class="text-center mb-4">Create Your Account</h4>
@@ -81,10 +92,10 @@ if (isset($_POST['register'])) {
   </div>
 </div>
 
+<!-- ✅ Toast on Success -->
 <?php if ($success): ?>
-<!-- ✅ Success Toast -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11;">
-  <div id="successToast" class="toast align-items-center text-bg-success border-0 show" role="alert">
+  <div class="toast align-items-center text-bg-success border-0 show" role="alert">
     <div class="d-flex">
       <div class="toast-body">
         🎉 Account created successfully! Redirecting to login...

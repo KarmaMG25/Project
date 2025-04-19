@@ -1,9 +1,24 @@
-<!-- Project_7/user/user_template/public_footer.php -->
-  </main>
-  <footer class="bg-light text-center py-3 mt-4 border-top">
-    <small>&copy; <?= date("Y") ?> Angus &amp; Coote. All rights reserved.</small>
-  </footer>
+</main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ✅ Public Footer with Social Media -->
+<footer class="bg-light text-center pt-4 pb-3 mt-4 border-top">
+  <div class="mb-3">
+    <a href="https://facebook.com" target="_blank" class="mx-2">
+      <img src="../include/facebook.png" alt="Facebook" style="height: 28px;">
+    </a>
+    <a href="https://instagram.com" target="_blank" class="mx-2">
+      <img src="../include/instagram.png" alt="Instagram" style="height: 28px;">
+    </a>
+    <a href="https://twitter.com" target="_blank" class="mx-2">
+      <img src="../include/X.png" alt="X / Twitter" style="height: 28px;">
+    </a>
+  </div>
+  <small>
+    &copy; <?= date("Y") ?> <a href="main.php" class="text-decoration-none text-dark fw-semibold">Angus & Coote</a>. All rights reserved.
+  </small>
+</footer>
+
+<!-- ✅ Bootstrap Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

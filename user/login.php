@@ -41,6 +41,17 @@ if (isset($_POST['login'])) {
 
 <?php include 'user_template/public_header.php'; ?>
 
+<style>
+  body {
+    background: url('../include/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+  }
+
+  .card {
+    background-color: rgba(255, 255, 255, 0.95); /* soft white backdrop */
+  }
+</style>
+
 
 <div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
   <div class="card p-4 shadow-sm" style="min-width: 350px; max-width: 400px; width: 100%;">

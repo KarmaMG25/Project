@@ -8,10 +8,19 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="user_template/css/style.css">
 </head>
+
 <body class="d-flex flex-column min-vh-100">
+
+  <!-- ✅ Public Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container">
-      <a class="navbar-brand" href="main.php">Angus & Coote</a>
+    
+      <!-- ✅ Logo + Brand -->
+      <a class="navbar-brand d-flex align-items-center gap-2" href="main.php">
+        <img src="../include/logo.jpg" alt="Angus & Coote Logo" style="height: 40px;">
+        <span class="fw-bold">Angus & Coote</span>
+      </a>
+
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -27,4 +36,5 @@
     </div>
   </nav>
 
+  <!-- ✅ Page Content -->
   <main class="container mt-4 flex-grow-1">
