@@ -1,0 +1,45 @@
+/* Dashboard Info Cards (Inquiries & Reports section) */
+.dashboard-info-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 150px;
+    backdrop-filter: blur(6px);
+    width: 100%;
+  }
+  
+  .dashboard-info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  }
+  
+  .dashboard-info-icon {
+    font-size: 2.5rem;
+    color: #4e73df;
+    margin-bottom: 10px;
+  }
+  
+  .dashboard-info-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #343a40;
+    margin-bottom: 5px;
+  }
+  
+  .dashboard-info-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #212529;
+    margin-bottom: 10px;
+  }
+  
+  .dashboard-info-btn a {
+    white-space: nowrap;
+  }
+  

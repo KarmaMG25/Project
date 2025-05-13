@@ -1,0 +1,164 @@
+/* Base Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  /* Body */
+  body {
+    background-color: #f0f2f5;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  /* Logo Section */
+  .text-center img.logo {
+    height: 60px;
+  }
+  
+  .text-center h4 {
+    color: #232ed1;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+  
+  /* Login/Register Wrapper */
+  .login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  
+  /* Card */
+  .login-card,
+  .login-container {
+    width: 100%;
+    max-width: 420px;
+    background-color: #ffffff;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .login-card h2,
+  .login-container h2 {
+    font-size: 1.8rem;
+    color: #232ed1;
+    margin-bottom: 25px;
+    text-align: center;
+  }
+  
+  /* Input Group */
+  .input-group,
+  .mb-3 {
+    margin-bottom: 20px;
+  }
+  
+  label.form-label {
+    font-weight: 500;
+    color: #101d42;
+  }
+  
+  input.form-control {
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  input.form-control:focus {
+    border-color: #232ed1;
+    outline: none;
+    box-shadow: none;
+  }
+  
+  /* Buttons */
+  .btn,
+  .btn-primary {
+    width: 100%;
+    padding: 12px;
+    background-color: #232ed1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn:hover,
+  .btn-primary:hover {
+    background-color: #101d42;
+  }
+  
+  /* Error Box */
+  .error-box,
+  .error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+  
+  /* Success Box (for register) */
+  .success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+  
+  /* Footer */
+  footer {
+    background-color: #232ed1;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  footer p {
+    font-size: 1rem;
+  }
+  
+  /* Social Icons */
+  .social-media {
+    margin-top: 10px;
+  }
+  
+  .social-media img {
+    width: 30px;
+    height: 30px;
+    margin: 0 8px;
+    transition: transform 0.3s ease;
+  }
+  
+  .social-media img:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .login-container,
+    .login-card {
+      padding: 25px;
+      margin: 20px;
+    }
+  }
+  

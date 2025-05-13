@@ -2,210 +2,132 @@
 session_start();
 include '../include/db.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['admin_email'])) {
     header("Location: login.php");
     exit();
 }
 
-// Fetch the total number of registered users
-$user_query = "SELECT COUNT(*) AS total_users FROM users";
-$user_result = mysqli_query($conn, $user_query);
-$user_data = mysqli_fetch_array($user_result);
+// Safe counts
+function safe_count($conn, $table, $alias) {
+    $result = mysqli_query($conn, "SELECT COUNT(*) AS $alias FROM $table");
+    $data = $result ? mysqli_fetch_array($result) : [$alias => 0];
+    return $data[$alias];
+}
 
-// Fetch the total number of products
-$product_query = "SELECT COUNT(*) AS total_products FROM products";
-$product_result = mysqli_query($conn, $product_query);
-$product_data = mysqli_fetch_array($product_result);
+$total_users = safe_count($conn, 'users', 'total_users');
+$total_products = safe_count($conn, 'products', 'total_products');
+$total_orders = safe_count($conn, 'orders', 'total_orders');
+$total_inquiries = safe_count($conn, 'inquiries', 'total_inquiries');
+$total_reviews = safe_count($conn, 'reviews', 'total_reviews');
 
-// Fetch the total number of orders
-$order_query = "SELECT COUNT(*) AS total_orders FROM orders";
-$order_result = mysqli_query($conn, $order_query);
-$order_data = mysqli_fetch_array($order_result);
-
-// Fetch the total number of inquiries
-$inquiry_query = "SELECT COUNT(*) AS total_inquiries FROM inquiries";
-$inquiry_result = mysqli_query($conn, $inquiry_query);
-$inquiry_data = mysqli_fetch_array($inquiry_result);
-
-// Fetch the total number of reviews
-$review_query = "SELECT COUNT(*) AS total_reviews FROM reviews";
-$review_result = mysqli_query($conn, $review_query);
-$review_data = mysqli_fetch_array($review_result);
+// Recent Orders Query
+$recent_orders = mysqli_query($conn, "
+  SELECT o.id, u.name, o.total_price, o.status, o.created_at 
+  FROM orders o 
+  JOIN users u ON o.user_id = u.id 
+  ORDER BY o.created_at DESC LIMIT 5
+");
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* Center the header */
-        header {
-            text-align: center;
-            margin-top: 20px;
-        }
+<?php include 'admin_template/header.php'; ?>
 
-        /* Center the navbar */
-        .navbar {
-            display: flex;
-            justify-content: center;
-            background-color: #f8f9fa;
-            padding: 10px;
-        }
+<div class="container mt-5 bg-overlay">
+  <h2 class="text-center mb-4">Welcome, <?php echo htmlspecialchars($_SESSION['admin_email']); ?></h2>
 
-        .navbar-nav {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
+  <!-- Quick Actions -->
+  <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
+    <a href="products.php" class="btn btn-primary">Manage Products</a>
+    <a href="orders.php" class="btn btn-success">View Orders</a>
+    <a href="users.php" class="btn btn-info">Manage Users</a>
+    <a href="reports.php" class="btn btn-warning">View Reports</a>
+    <a href="logout.php" class="btn btn-danger">Logout</a>
+  </div>
 
-        .nav-item {
-            margin: 0 15px;
-        }
+  <!-- Stats Cards -->
+  <div class="row text-center">
+    <?php
+    $stats = [
+      'Total Users' => $total_users,
+      'Total Products' => $total_products,
+      'Total Orders' => $total_orders,
+      'Total Inquiries' => $total_inquiries,
+      'Total Reviews' => $total_reviews
+    ];
 
-        /* Sticky footer */
-        footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: #f8f9fa;
-            height: 50px;
-            text-align: center;
-            line-height: 50px;
-            box-shadow: 0px -2px 5px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-</head>
-<body>
-
-<!-- Header -->
-<header>
-    <h1>Admin Dashboard</h1>
-</header>
-
-<!-- Navigation Bar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="managementDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Management
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="managementDropdown">
-                        <a class="dropdown-item" href="categories/index.php">Manage Categories</a>
-
-                        <a class="dropdown-item" href="subcategories/subcategories.php">Sub-Categories Management</a>
-                        <a class="dropdown-item" href="products/products.php">Products Management</a>
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Orders & Reports
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="ordersDropdown">
-                        <a class="dropdown-item" href="orders/order.php">Orders Management</a>
-                        <a class="dropdown-item" href="reports.php">Reports</a>
-                        <a class="dropdown-item" href="search_orders.php">Search Orders</a>
-                    </div>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="ordersDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Manage Info
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="ordersDropdown">
-                        <a class="dropdown-item" href="reviews.php">Reviews</a>
-                        <a class="dropdown-item" href="inquiries.php">Inquires</a>
-                        <a class="dropdown-item" href="Pages.php">Pages</a>
-                    </div>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="usersDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Users
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="usersDropdown">
-                        <a class="dropdown-item" href="users.php">Registered Users</a>
-                        <a class="dropdown-item" href="subscribers.php">Subscribers</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="profile.php">Profile</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btn btn-danger text-white" href="logout.php">Logout</a>
-                </li>
-            </ul>
+    foreach ($stats as $label => $value): ?>
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title"><?php echo $label; ?></h5>
+            <p class="card-text display-4"><?php echo $value; ?></p>
+          </div>
         </div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+
+  <!-- Recent Orders Table -->
+  <div class="card mt-4">
+    <div class="card-header bg-dark text-white">
+      Recent Orders
     </div>
-</nav>
-
-<!-- Main Content -->
-<div class="container mt-4">
-    <h1 class="text-center mb-4">Welcome, <?php echo $_SESSION['admin_email']; ?></h1>
-    <p class="text-center">This is your admin dashboard.</p>
-
-    <div class="row text-center">
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Users</h5>
-                    <p class="card-text display-4"><?php echo $user_data['total_users']; ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Products</h5>
-                    <p class="card-text display-4"><?php echo $product_data['total_products']; ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Orders</h5>
-                    <p class="card-text display-4"><?php echo $order_data['total_orders']; ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Inquiries</h5>
-                    <p class="card-text display-4"><?php echo $inquiry_data['total_inquiries']; ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Total Reviews</h5>
-                    <p class="card-text display-4"><?php echo $review_data['total_reviews']; ?></p>
-                </div>
-            </div>
-        </div>
+    <div class="card-body p-0">
+      <table class="table table-hover mb-0">
+        <thead class="thead-dark">
+          <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if(mysqli_num_rows($recent_orders) > 0): ?>
+            <?php while($row = mysqli_fetch_assoc($recent_orders)): ?>
+              <tr>
+                <td><?php echo $row['id']; ?></td>
+                <td><?php echo htmlspecialchars($row['name']); ?></td>
+                <td>$<?php echo number_format($row['total_price'], 2); ?></td>
+                <td><?php echo ucfirst($row['status']); ?></td>
+                <td><?php echo date('d M Y', strtotime($row['created_at'])); ?></td>
+              </tr>
+            <?php endwhile; ?>
+          <?php else: ?>
+            <tr>
+              <td colspan="5" class="text-center">No recent orders found.</td>
+            </tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
     </div>
+  </div>
+
+  <!-- Inquiries & Reports Info Cards -->
+  <div class="row mt-4 g-3">
+    <div class="col-md-6">
+      <div class="dashboard-info-card">
+        <i class="bi bi-chat-dots-fill dashboard-info-icon"></i>
+        <div class="dashboard-info-title">Pending Inquiries</div>
+        <div class="dashboard-info-value"><?php echo $total_inquiries; ?> pending</div>
+        <div class="dashboard-info-btn">
+          <a href="inquiries.php" class="btn btn-outline-primary btn-sm">View All</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="dashboard-info-card">
+        <i class="bi bi-flag-fill dashboard-info-icon"></i>
+        <div class="dashboard-info-title">User Reports</div>
+        <div class="dashboard-info-value">Check issues</div>
+        <div class="dashboard-info-btn">
+          <a href="reports.php" class="btn btn-outline-warning btn-sm">View Reports</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- Footer -->
-<footer>
-    &copy; 2025 Admin Dashboard. All Rights Reserved.
-</footer>
-
-<!-- jQuery and Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+<?php include 'admin_template/footer.php'; ?>

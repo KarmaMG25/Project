@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 include '../include/db.php';
 
@@ -6,7 +8,6 @@ if (isset($_POST['login'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = $_POST['password'];
 
-    // Prepared statement to prevent SQL injection
     $query = "SELECT * FROM admin WHERE email = ?";
     $stmt = mysqli_prepare($conn, $query);
     mysqli_stmt_bind_param($stmt, 's', $email);
@@ -15,80 +16,51 @@ if (isset($_POST['login'])) {
 
     if (mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_assoc($result);
-
-        // Verify the password
         if (password_verify($password, $row['password'])) {
-            // Regenerate session ID to prevent session fixation
             session_regenerate_id(true);
             $_SESSION['admin_email'] = $row['email'];
-            
-            // Redirect to the dashboard
             header("Location: dashboard.php");
             exit();
         } else {
-            $error = "Login failed!";
+            $error = "Invalid password. Please try again.";
         }
     } else {
-        $error = "Login failed!";
+        $error = "No account found with this email.";
     }
+
     mysqli_stmt_close($stmt);
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
-    <link href="../Style/admin_login.css" rel="stylesheet">
+<?php include 'admin_template/header_auth.php'; ?>
 
-</head>
-<body>
+<div class="login-wrapper">
+  <div class="login-card mt-3">
+    <h2>Login</h2>
 
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <h1>Admin Dashboard</h1>
-        </div>
-    </header>
+    <?php if (isset($error)): ?>
+      <div class="error-box"><?php echo htmlspecialchars($error); ?></div>
+    <?php endif; ?>
 
-    <!-- Navigation -->
-    <nav>
-        <a href="index.php">Home</a>
-        <a href="about.php">About</a>
-        <a href="contact.php">Contact</a>
-    </nav>
+    <form method="POST" autocomplete="off">
+      <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" name="email" class="form-control" id="email" required>
+      </div>
 
-    <!-- Login Form -->
-    <div class="login-container">
-        <h2>Admin Login</h2>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" id="password" required>
+      </div>
 
-        <?php if (isset($error)): ?>
-            <div class="error"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
+      <button type="submit" name="login" class="btn btn-primary w-100">Login</button>
 
-        <form method="POST" autocomplete="off">
-            <div class="input-group">
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" required autocomplete="username">
-            </div>
+      <p class="mt-3 text-center">
+        Don't have an account?
+        <a href="register.php" class="text-decoration-underline">Register</a>
+      </p>
+    </form>
+  </div>
+</div>
 
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" required autocomplete="current-password">
-            </div>
-
-            <button type="submit" name="login" class="btn">Login</button>
-
-            <p>Don't have an account? <a href="register.php">Register here</a></p>
-        </form>
-    </div>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2025 Angus & Coote. All rights reserved.</p>
-    </footer>
-
-</body>
-</html>
+<?php include 'admin_template/footer.php'; ?>

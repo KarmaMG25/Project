@@ -1,0 +1,67 @@
+/* Clear Background Image – Fullscreen & Sharp */
+body {
+    background: url('../../include/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  /* Dashboard Content Container */
+  .bg-overlay {
+    background-color: rgba(255, 255, 255, 0.98); /* solid white overlay for content only */
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 30px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Card Design */
+  .card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+    background-color: #fff;
+  }
+  
+  .card:hover {
+    transform: scale(1.03);
+  }
+  
+  .card-title {
+    color: #1e3a8a;
+    font-weight: 600;
+  }
+  
+  .card-text {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Navbar Styling */
+  .navbar {
+    background-color: rgba(255, 255, 255, 0.98) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+  }
+  
+  /* Footer Styling */
+  footer {
+    background-color: rgba(255, 255, 255, 0.95);
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    margin-top: auto;
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Layout Container */
+  .container {
+    max-width: 1140px;
+  }
+  
