@@ -52,7 +52,7 @@ if (!isset($_SESSION['admin_email'])) {
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Orders & Reports</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="orders/order.php">Orders</a></li>
+            <li><a class="dropdown-item" href="orders/orders.php">Orders</a></li>
             <li><a class="dropdown-item" href="reports.php">Reports</a></li>
             <li><a class="dropdown-item" href="search_orders.php">Search Orders</a></li>
           </ul>

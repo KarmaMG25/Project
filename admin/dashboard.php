@@ -37,7 +37,7 @@ $recent_orders = mysqli_query($conn, "
   <!-- Quick Actions -->
   <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
     <a href="products.php" class="btn btn-primary">Manage Products</a>
-    <a href="orders.php" class="btn btn-success">View Orders</a>
+    <a href="orders/orders.php" class="btn btn-success">View Orders</a>
     <a href="users.php" class="btn btn-info">Manage Users</a>
     <a href="reports.php" class="btn btn-warning">View Reports</a>
     <a href="logout.php" class="btn btn-danger">Logout</a>
