@@ -7,127 +7,134 @@ if (!isset($_SESSION['admin_email'])) {
     exit();
 }
 
-// Safe counts
-function safe_count($conn, $table, $alias) {
-    $result = mysqli_query($conn, "SELECT COUNT(*) AS $alias FROM $table");
-    $data = $result ? mysqli_fetch_array($result) : [$alias => 0];
-    return $data[$alias];
-}
+// Fetch KPI data
+$total_orders = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS count FROM orders"))['count'];
+$pending_orders = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS count FROM orders WHERE status = 'Pending'"))['count'];
+$total_revenue = mysqli_fetch_assoc(mysqli_query($conn, "SELECT SUM(total_price) AS total FROM orders"))['total'] ?? 0;
+$total_users = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS count FROM users"))['count'];
+$total_products = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS count FROM products"))['count'];
+$total_inquiries = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS count FROM inquiries"))['count'];
+$total_reviews = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS count FROM reviews"))['count'];
 
-$total_users = safe_count($conn, 'users', 'total_users');
-$total_products = safe_count($conn, 'products', 'total_products');
-$total_orders = safe_count($conn, 'orders', 'total_orders');
-$total_inquiries = safe_count($conn, 'inquiries', 'total_inquiries');
-$total_reviews = safe_count($conn, 'reviews', 'total_reviews');
-
-// Recent Orders Query
 $recent_orders = mysqli_query($conn, "
-  SELECT o.id, u.name, o.total_price, o.status, o.created_at 
-  FROM orders o 
-  JOIN users u ON o.user_id = u.id 
-  ORDER BY o.created_at DESC LIMIT 5
+    SELECT o.id, u.name, o.total_price, o.status, o.created_at 
+    FROM orders o 
+    JOIN users u ON o.user_id = u.id 
+    ORDER BY o.created_at DESC LIMIT 5
 ");
 ?>
 
 <?php include 'admin_template/header.php'; ?>
 
-<div class="container mt-5 bg-overlay">
-  <h2 class="text-center mb-4">Welcome, <?php echo htmlspecialchars($_SESSION['admin_email']); ?></h2>
+<style>
+  body {
+    background: url('/Project_7/include/background.jpg') no-repeat center center fixed;
+    background-size: cover;
+  }
 
-  <!-- Quick Actions -->
-  <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
-    <a href="products.php" class="btn btn-primary">Manage Products</a>
-    <a href="orders/orders.php" class="btn btn-success">View Orders</a>
-    <a href="users.php" class="btn btn-info">Manage Users</a>
-    <a href="reports.php" class="btn btn-warning">View Reports</a>
-    <a href="logout.php" class="btn btn-danger">Logout</a>
+  .glass-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    padding: 25px;
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .dashboard-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 30px;
+    margin-top: 30px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+
+  .info-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.2s ease;
+  }
+
+  .info-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .table thead th {
+    background-color: #1e3a8a;
+    color: white;
+  }
+</style>
+
+<div class="container my-5">
+  <h2 class="text-center mb-5">Admin Dashboard</h2>
+
+  <!-- KPI Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3"><div class="glass-card"><i class="bi bi-bag-fill text-primary fs-3 mb-2"></i><div>Total Orders</div><div class="fs-2 fw-bold"><?= $total_orders; ?></div></div></div>
+    <div class="col-md-3"><div class="glass-card"><i class="bi bi-clock-fill text-warning fs-3 mb-2"></i><div>Pending Orders</div><div class="fs-2 fw-bold"><?= $pending_orders; ?></div></div></div>
+    <div class="col-md-3"><div class="glass-card"><i class="bi bi-cash-coin text-success fs-3 mb-2"></i><div>Total Revenue</div><div class="fs-2 fw-bold">$<?= number_format($total_revenue, 2); ?></div></div></div>
+    <div class="col-md-3"><div class="glass-card"><i class="bi bi-people-fill text-info fs-3 mb-2"></i><div>Users</div><div class="fs-2 fw-bold"><?= $total_users; ?></div></div></div>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="row text-center">
-    <?php
-    $stats = [
-      'Total Users' => $total_users,
-      'Total Products' => $total_products,
-      'Total Orders' => $total_orders,
-      'Total Inquiries' => $total_inquiries,
-      'Total Reviews' => $total_reviews
-    ];
-
-    foreach ($stats as $label => $value): ?>
-      <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <h5 class="card-title"><?php echo $label; ?></h5>
-            <p class="card-text display-4"><?php echo $value; ?></p>
-          </div>
-        </div>
-      </div>
-    <?php endforeach; ?>
+  <!-- Quick Stats -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4"><div class="glass-card"><i class="bi bi-box-fill text-secondary fs-3 mb-2"></i><div>Products</div><div class="fs-2 fw-bold"><?= $total_products; ?></div></div></div>
+    <div class="col-md-4"><div class="glass-card"><i class="bi bi-chat-dots-fill text-primary fs-3 mb-2"></i><div>Inquiries</div><div class="fs-2 fw-bold"><?= $total_inquiries; ?></div></div></div>
+    <div class="col-md-4"><div class="glass-card"><i class="bi bi-star-fill text-warning fs-3 mb-2"></i><div>Reviews</div><div class="fs-2 fw-bold"><?= $total_reviews; ?></div></div></div>
   </div>
 
-  <!-- Recent Orders Table -->
-  <div class="card mt-4">
-    <div class="card-header bg-dark text-white">
-      Recent Orders
-    </div>
-    <div class="card-body p-0">
-      <table class="table table-hover mb-0">
-        <thead class="thead-dark">
-          <tr>
-            <th>#</th>
-            <th>Customer</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr>
-        </thead>
+  <!-- Recent Orders -->
+  <div class="dashboard-section">
+    <h5 class="mb-4">Recent Orders</h5>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead><tr><th>#</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
         <tbody>
           <?php if(mysqli_num_rows($recent_orders) > 0): ?>
             <?php while($row = mysqli_fetch_assoc($recent_orders)): ?>
               <tr>
-                <td><?php echo $row['id']; ?></td>
-                <td><?php echo htmlspecialchars($row['name']); ?></td>
-                <td>$<?php echo number_format($row['total_price'], 2); ?></td>
-                <td><?php echo ucfirst($row['status']); ?></td>
-                <td><?php echo date('d M Y', strtotime($row['created_at'])); ?></td>
+                <td><?= $row['id']; ?></td>
+                <td><?= htmlspecialchars($row['name']); ?></td>
+                <td>$<?= number_format($row['total_price'], 2); ?></td>
+                <td><?= ucfirst($row['status']); ?></td>
+                <td><?= date('d M Y', strtotime($row['created_at'])); ?></td>
               </tr>
             <?php endwhile; ?>
           <?php else: ?>
-            <tr>
-              <td colspan="5" class="text-center">No recent orders found.</td>
-            </tr>
+            <tr><td colspan="5" class="text-center">No recent orders found.</td></tr>
           <?php endif; ?>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Inquiries & Reports Info Cards -->
+  <!-- Info Cards -->
   <div class="row mt-4 g-3">
     <div class="col-md-6">
-      <div class="dashboard-info-card">
-        <i class="bi bi-chat-dots-fill dashboard-info-icon"></i>
-        <div class="dashboard-info-title">Pending Inquiries</div>
-        <div class="dashboard-info-value"><?php echo $total_inquiries; ?> pending</div>
-        <div class="dashboard-info-btn">
-          <a href="inquiries.php" class="btn btn-outline-primary btn-sm">View All</a>
-        </div>
+      <div class="info-card">
+        <div class="d-flex align-items-center"><i class="bi bi-chat-dots-fill fs-2 me-3 text-primary"></i><div><div class="fw-bold">Pending Inquiries</div><div><?= $total_inquiries; ?> pending</div></div></div>
+        <a href="inquiries.php" class="btn btn-outline-primary btn-sm">View All</a>
       </div>
     </div>
-
     <div class="col-md-6">
-      <div class="dashboard-info-card">
-        <i class="bi bi-flag-fill dashboard-info-icon"></i>
-        <div class="dashboard-info-title">User Reports</div>
-        <div class="dashboard-info-value">Check issues</div>
-        <div class="dashboard-info-btn">
-          <a href="reports.php" class="btn btn-outline-warning btn-sm">View Reports</a>
-        </div>
+      <div class="info-card">
+        <div class="d-flex align-items-center"><i class="bi bi-flag-fill fs-2 me-3 text-warning"></i><div><div class="fw-bold">User Reports</div><div>Check issues</div></div></div>
+        <a href="reports.php" class="btn btn-outline-warning btn-sm">View Reports</a>
       </div>
     </div>
   </div>
-
 </div>
 
 <?php include 'admin_template/footer.php'; ?>

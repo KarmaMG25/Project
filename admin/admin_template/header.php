@@ -33,7 +33,8 @@ if (!isset($_SESSION['admin_email'])) {
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
   <div class="container">
     <a class="navbar-brand fw-bold" href="dashboard.php">
-      <img src="../include/logo.jpg" alt="Logo" style="height: 40px;" class="me-2">
+    <img src="/Project_7/include/logo.jpg" alt="Logo" style="height: 40px;" class="me-2">
+
       Angus & Coote Admin
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
@@ -73,7 +74,9 @@ if (!isset($_SESSION['admin_email'])) {
           </ul>
         </li>
         <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
-        <li class="nav-item"><a class="nav-link btn btn-danger text-white px-3" href="logout.php">Logout</a></li>
+        <li class="nav-item"><a class="nav-link btn btn-outline-danger px-3" href="logout.php">Logout</a>
+        </li>
+
       </ul>
     </div>
   </div>

@@ -25,77 +25,18 @@ if (isset($_GET['delete_id'])) {
     exit();
 }
 
-// Fetch orders with user info
+// Fetch orders ascending
 $orderQuery = "
     SELECT o.id, u.name AS customer_name, o.total_price, o.status, o.created_at
     FROM orders o
     JOIN users u ON o.user_id = u.id
-    ORDER BY o.id DESC
+    ORDER BY o.id ASC
 ";
+
 $orderResult = mysqli_query($conn, $orderQuery);
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Order Management | Angus & Coote</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="../../admin/admin_css/admin_style.css">
 
-  <style>
-    .table-responsive {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(6px);
-    }
-
-    .table thead th {
-        background-color: rgba(30, 58, 138, 0.9);
-        color: white;
-        font-weight: 600;
-    }
-
-    .table-striped tbody tr:nth-of-type(odd) {
-        background-color: rgba(0, 0, 0, 0.02);
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: rgba(30, 58, 138, 0.08);
-    }
-
-    .navbar-brand {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-    }
-  </style>
-</head>
-<body class="d-flex flex-column min-vh-100">
-
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="../dashboard.php">
-      <img src="../../include/logo.jpg" alt="Logo" style="height: 40px;" class="me-2">
-      Angus & Coote Admin
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="adminNavbar">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="../dashboard.php">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="orders.php">Orders</a></li>
-        <li class="nav-item"><a class="nav-link" href="../reports.php">Reports</a></li>
-        <li class="nav-item"><a class="nav-link" href="../users.php">Users</a></li>
-        <li class="nav-item"><a class="nav-link btn btn-danger text-white px-3" href="../logout.php">Logout</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
+<?php include 'header_order.php'; ?>
 
 <div class="container my-5">
     <h2 class="text-center mb-4">Order Management</h2>
@@ -120,29 +61,33 @@ $orderResult = mysqli_query($conn, $orderQuery);
                             <td><?= htmlspecialchars($order['customer_name']); ?></td>
                             <td>$<?= number_format($order['total_price'], 2); ?></td>
                             <td>
-                                <span class="badge bg-<?php
-                                    switch ($order['status']) {
-                                        case 'Pending': echo 'warning'; break;
-                                        case 'Processing': echo 'info'; break;
-                                        case 'Shipped': echo 'primary'; break;
-                                        case 'Delivered': echo 'success'; break;
-                                        default: echo 'secondary';
-                                    }
-                                ?>">
-                                    <?= $order['status']; ?>
-                                </span>
-                                <form method="POST" class="mt-2">
+                                <form method="POST" class="d-inline">
                                     <input type="hidden" name="order_id" value="<?= $order['id']; ?>">
-                                    <div class="input-group input-group-sm">
-                                        <select name="status" class="form-select" onchange="this.form.submit()">
-                                            <?php foreach (['Pending', 'Processing', 'Shipped', 'Delivered'] as $status): ?>
-                                                <option value="<?= $status; ?>" <?= ($order['status'] === $status) ? 'selected' : ''; ?>>
-                                                    <?= $status; ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
                                     <input type="hidden" name="update_status" value="1">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm badge bg-<?php
+                                            switch ($order['status']) {
+                                                case 'Pending': echo 'warning'; break;
+                                                case 'Processing': echo 'info'; break;
+                                                case 'Shipped': echo 'primary'; break;
+                                                case 'Delivered': echo 'success'; break;
+                                                default: echo 'secondary';
+                                            }
+                                        ?> dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <?= $order['status']; ?>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <?php foreach (['Pending', 'Processing', 'Shipped', 'Delivered'] as $status): ?>
+                                                <?php if ($order['status'] !== $status): ?>
+                                                    <li>
+                                                        <button type="submit" name="status" value="<?= $status; ?>" class="dropdown-item">
+                                                            <?= $status; ?>
+                                                        </button>
+                                                    </li>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
                                 </form>
                             </td>
                             <td><?= date('d M Y', strtotime($order['created_at'])); ?></td>
@@ -153,27 +98,11 @@ $orderResult = mysqli_query($conn, $orderQuery);
                         </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <tr>
-                        <td colspan="6" class="text-center">No orders found.</td>
-                    </tr>
+                    <tr><td colspan="6" class="text-center">No orders found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- Footer -->
-<footer class="footer mt-auto py-3">
-  <div class="text-center">
-    <small>&copy; <?= date('Y'); ?> Angus & Coote. All rights reserved.</small>
-    <div class="d-flex justify-content-center gap-3 mt-2">
-      <a href="https://www.facebook.com" target="_blank"><img src="../../include/facebook.png" alt="Facebook" style="width: 28px;"></a>
-      <a href="https://www.instagram.com" target="_blank"><img src="../../include/instagram.png" alt="Instagram" style="width: 28px;"></a>
-      <a href="https://twitter.com" target="_blank"><img src="../../include/X.png" alt="Twitter" style="width: 28px;"></a>
-    </div>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php include 'footer_order.php'; ?>
