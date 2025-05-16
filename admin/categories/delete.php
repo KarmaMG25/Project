@@ -8,9 +8,8 @@ if (!isset($_SESSION['admin_email'])) {
 }
 
 if (isset($_GET['id'])) {
-    $category_id = $_GET['id'];
-    $delete_query = "DELETE FROM categories WHERE id='$category_id'";
-    mysqli_query($conn, $delete_query);
+    $id = intval($_GET['id']);
+    mysqli_query($conn, "DELETE FROM categories WHERE id = $id");
 }
 
 header("Location: index.php");
