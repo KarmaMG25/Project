@@ -69,9 +69,10 @@
       </button>
       <div class="collapse navbar-collapse justify-content-end" id="authNavbar">
         <ul class="navbar-nav">
+        <li class="nav-item"><a class="nav-link" href="../guest/index.php">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="login.php">Login</a></li>
           <li class="nav-item"><a class="nav-link" href="register.php">Register</a></li>
-          <li class="nav-item"><a class="nav-link" href="../../guest/homepage.php">Home</a></li>
+       
         </ul>
       </div>
     </div>
