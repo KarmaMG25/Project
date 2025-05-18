@@ -19,7 +19,8 @@ $categories = mysqli_query($conn, "SELECT * FROM categories ORDER BY id ASC");
 </head>
 <body>
 
-<?php include '../admin_template/header.php'; ?>
+<?php include 'header_categories.php'; ?>
+
 
 <div class="container my-5">
     <h2 class="text-center mb-4">Manage Categories</h2>

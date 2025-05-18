@@ -39,7 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-<?php include '../admin_template/header.php'; ?>
+<?php include 'header_categories.php'; ?>
+
 
 <div class="container my-5">
     <h2 class="text-center mb-4"><?= $id > 0 ? 'Edit' : 'Add New'; ?> Category</h2>
