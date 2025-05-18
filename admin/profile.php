@@ -2,115 +2,103 @@
 session_start();
 include '../include/db.php';
 
-// Check if the admin is logged in
 if (!isset($_SESSION['admin_email'])) {
     header("Location: login.php");
     exit();
 }
 
-// Fetch current admin information
 $admin_email = $_SESSION['admin_email'];
-$query = "SELECT * FROM admin WHERE email = '$admin_email'";
-$result = mysqli_query($conn, $query);
-$admin_data = mysqli_fetch_assoc($result);
 
-// Update profile information
-if (isset($_POST['update_profile'])) {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
+// Fetch admin details
+$query = "SELECT * FROM admin WHERE email = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $admin_email);
+$stmt->execute();
+$result = $stmt->get_result();
+$admin = $result->fetch_assoc();
+$stmt->close();
+
+// Handle update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
+    $name = trim($_POST['name']);
+    $phone = trim($_POST['phone']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
-    $phone = $_POST['phone'];
 
-    // If a new password is provided, check if it matches the confirm password field
+    $error = null;
+
+    // If password is entered, validate it
     if (!empty($password)) {
         if ($password === $confirm_password) {
-            // Hash the new password if they match
-            $password = password_hash($password, PASSWORD_BCRYPT);
+            $hashed = password_hash($password, PASSWORD_BCRYPT);
         } else {
-            $error_message = "Passwords do not match!";
+            $error = "Passwords do not match.";
         }
     } else {
-        $password = $admin_data['password']; // Keep the old password if no new password
+        $hashed = $admin['password'];
     }
 
-    // Update the admin data in the database if no errors
-    if (!isset($error_message)) {
-        $update_query = "UPDATE admin SET name = '$name', email = '$email', password = '$password', phone = '$phone' WHERE email = '$admin_email'";
-        if (mysqli_query($conn, $update_query)) {
-            echo "Profile updated successfully!";
-        } else {
-            echo "Error updating profile: " . mysqli_error($conn);
-        }
-    } else {
-        echo $error_message; // Show the error message if passwords don't match
+    // Update if no error
+    if (!$error) {
+        $stmt = $conn->prepare("UPDATE admin SET name=?, phone=?, password=? WHERE email=?");
+        $stmt->bind_param("ssss", $name, $phone, $hashed, $admin_email);
+        $stmt->execute();
+        $stmt->close();
+        $success = "Profile updated successfully.";
+        // Refresh data
+        $admin['name'] = $name;
+        $admin['phone'] = $phone;
     }
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Profile</title>
-    <link rel="stylesheet" href="../Style/admin_profile.css">
-</head>
-<body>
+<?php include 'admin_template/header.php'; ?>
 
-<!-- Header -->
-<header>
-    <h1>Admin Profile</h1>
-</header>
+<div class="container my-5">
+    <h2 class="text-center mb-4">Admin Profile</h2>
 
-<!-- Navigation Bar -->
-<nav class="navbar">
-    <ul>
-        <li><a href="dashboard.php">Dashboard</a></li>
-        <li><a href="profile.php">Profile</a></li>
-        <li><a href="logout.php">Logout</a></li>
-    </ul>
-</nav>
+    <!-- Admin Profile Card -->
+    <div class="d-flex justify-content-center">
+        <div class="card shadow p-4" style="max-width: 550px; width: 100%;">
+            <div class="text-center mb-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" width="90" class="rounded-circle mb-2" alt="Admin Icon">
+                <h4 class="card-title"><?= htmlspecialchars($admin['name']) ?></h4>
+                <p class="text-muted">Email: <?= htmlspecialchars($admin['email']) ?></p>
+            </div>
 
-<!-- Main Content -->
-<div class="container">
-    <h2>Update Your Profile</h2><br>
+            <?php if (isset($success)) : ?>
+                <div class="alert alert-success text-center"><?= $success; ?></div>
+            <?php elseif (isset($error)) : ?>
+                <div class="alert alert-danger text-center"><?= $error; ?></div>
+            <?php endif; ?>
 
-    <form method="POST" action="profile.php">
-        <div class="form-group">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" value="<?php echo $admin_data['name']; ?>" required>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($admin['name']); ?>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" name="phone" class="form-control" value="<?= htmlspecialchars($admin['phone']); ?>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">New Password <small class="text-muted">(Leave blank to keep current)</small></label>
+                    <input type="password" name="password" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Re-enter New Password</label>
+                    <input type="password" name="confirm_password" class="form-control">
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" name="update_profile" class="btn btn-primary">Update Profile</button>
+                </div>
+            </form>
         </div>
-
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" value="<?php echo $admin_data['email']; ?>" required>
-        </div>
-
-        <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" value="<?php echo $admin_data['phone']; ?>" required>
-        </div>
-
-        <!-- New Password and Re-enter New Password Fields -->
-        <div class="form-group">
-            <label for="password">New Password (Leave blank to keep current)</label>
-            <input type="password" id="password" name="password">
-        </div>
-
-        <div class="form-group">
-            <label for="confirm_password">Re-enter New Password</label>
-            <input type="password" id="confirm_password" name="confirm_password">
-        </div>
-
-        <button type="submit" name="update_profile">Update Profile</button>
-    </form>
+    </div>
 </div>
 
-<!-- Footer -->
-<footer>
-    &copy; 2025 Admin Dashboard. All Rights Reserved.
-</footer>
-
-</body>
-</html>
+<?php include 'admin_template/footer.php'; ?>
