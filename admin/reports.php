@@ -53,7 +53,9 @@ $reports = $conn->query("
                 <?php endif; ?>
               </td>
               <td>
-                <?php if ($row['status'] !== 'resolved'): ?>
+                <?php if ($row['status'] === 'resolved'): ?>
+                  <a href="undo_report_status.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-outline-warning mb-1">Undo</a>
+                <?php else: ?>
                   <a href="mark_report_resolved.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-success mb-1">Mark Resolved</a>
                 <?php endif; ?>
                 <a href="delete_report.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this report?');">Delete</a>
