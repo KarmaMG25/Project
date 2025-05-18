@@ -17,8 +17,8 @@ if (isset($_POST['add_product'])) {
     $stock = mysqli_real_escape_string($conn, $_POST['stock']);
     $image = $_FILES['image']['name'];
 
-    if (!empty($category_id) && !empty($subcategory_id) && !empty($name) && !empty($price)) {
-        $target = "../../uploads/" . basename($image); // Correct path for the image upload
+    if (!empty($category_id) && !empty($subcategory_id) && !empty($name) && !empty($price) && !empty($image)) {
+        $target = "../../uploads/" . basename($image);
         move_uploaded_file($_FILES['image']['tmp_name'], $target);
 
         $query = "INSERT INTO products (category_id, subcategory_id, name, description, price, stock, image) 
@@ -30,81 +30,62 @@ if (isset($_POST['add_product'])) {
 }
 
 // Fetch categories and subcategories
-$categories_query = "SELECT * FROM categories ORDER BY name ASC";
-$categories_result = mysqli_query($conn, $categories_query);
-
-$subcategories_query = "SELECT * FROM subcategories ORDER BY name ASC";
-$subcategories_result = mysqli_query($conn, $subcategories_query);
+$categories_result = mysqli_query($conn, "SELECT * FROM categories ORDER BY name ASC");
+$subcategories_result = mysqli_query($conn, "SELECT * FROM subcategories ORDER BY name ASC");
 
 // Fetch products
 $products_query = "SELECT products.*, categories.name AS category_name, subcategories.name AS subcategory_name
                    FROM products
                    JOIN categories ON products.category_id = categories.id
                    JOIN subcategories ON products.subcategory_id = subcategories.id
-                   ORDER BY products.id DESC";
+                   ORDER BY products.id ASC";
 $products_result = mysqli_query($conn, $products_query);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products Management</title>
-    <link rel="stylesheet" href="../../style.css">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+<?php include 'header_products.php'; ?>
 
-<?php include '../require/nav.php'; ?> <!-- Corrected path to nav.php -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">Products Management</h2>
 
-<header class="bg-primary text-white text-center py-4 mb-4">
-    <div class="container">
-        <h1>Products Management</h1>
-        <p>Manage your jewelry products</p>
-    </div>
-</header>
-
-<div class="container mt-4">
     <!-- Add Product Form -->
-    <div class="card p-3 mb-4">
-        <h5>Add New Product</h5>
+    <div class="card p-4 mb-5 shadow-sm">
+        <h5 class="mb-3">Add New Product</h5>
         <form method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <label>Parent Category</label>
-                <select name="category_id" class="form-control" required>
+            <div class="mb-3">
+                <label>Category</label>
+                <select name="category_id" class="form-select" required>
                     <option value="">-- Select Category --</option>
                     <?php while ($cat = mysqli_fetch_assoc($categories_result)) : ?>
-                        <option value="<?php echo $cat['id']; ?>"><?php echo $cat['name']; ?></option>
+                        <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['name']); ?></option>
                     <?php endwhile; ?>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Parent Subcategory</label>
-                <select name="subcategory_id" class="form-control" required>
+            <div class="mb-3">
+                <label>Subcategory</label>
+                <select name="subcategory_id" class="form-select" required>
                     <option value="">-- Select Subcategory --</option>
                     <?php while ($subcat = mysqli_fetch_assoc($subcategories_result)) : ?>
-                        <option value="<?php echo $subcat['id']; ?>"><?php echo $subcat['name']; ?></option>
+                        <option value="<?= $subcat['id']; ?>"><?= htmlspecialchars($subcat['name']); ?></option>
                     <?php endwhile; ?>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label>Product Name</label>
                 <input type="text" name="name" class="form-control" required>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label>Description (optional)</label>
                 <textarea name="description" class="form-control" rows="3"></textarea>
             </div>
-            <div class="form-group">
-                <label>Price</label>
+            <div class="mb-3">
+                <label>Price ($)</label>
                 <input type="number" name="price" class="form-control" required step="0.01">
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label>Stock</label>
                 <input type="number" name="stock" class="form-control" required>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
                 <label>Product Image</label>
                 <input type="file" name="image" class="form-control" required>
             </div>
@@ -113,44 +94,51 @@ $products_result = mysqli_query($conn, $products_query);
     </div>
 
     <!-- Products Table -->
-    <table class="table table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th>ID</th>
-                <th>Category</th>
-                <th>Subcategory</th>
-                <th>Product Name</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Image</th>
-                <th>Created At</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = mysqli_fetch_assoc($products_result)) : ?>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
                 <tr>
-                    <td><?php echo $row['id']; ?></td>
-                    <td><?php echo $row['category_name']; ?></td>
-                    <td><?php echo $row['subcategory_name']; ?></td>
-                    <td><?php echo $row['name']; ?></td>
-                    <td><?php echo $row['description']; ?></td>
-                    <td><?php echo $row['price']; ?></td>
-                    <td><?php echo $row['stock']; ?></td>
-                    <td><img src="../../uploads/<?php echo $row['image']; ?>" width="100" alt="Product Image"></td>
-                    <td><?php echo $row['created_at']; ?></td>
-                    <td>
-                        <a href="edit.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                        <a href="delete.php?id=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
-                    </td>
+                    <th>ID</th>
+                    <th>Category</th>
+                    <th>Subcategory</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Price ($)</th>
+                    <th>Stock</th>
+                    <th>Image</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
                 </tr>
-            <?php endwhile; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php while ($row = mysqli_fetch_assoc($products_result)) : ?>
+                    <tr>
+                        <td><?= $row['id']; ?></td>
+                        <td><?= htmlspecialchars($row['category_name']); ?></td>
+                        <td><?= htmlspecialchars($row['subcategory_name']); ?></td>
+                        <td><?= htmlspecialchars($row['name']); ?></td>
+                        <td><?= htmlspecialchars($row['description']); ?></td>
+                        <td><?= $row['price']; ?></td>
+                        <td><?= $row['stock']; ?></td>
+                        <td>
+                            <?php if (!empty($row['image']) && file_exists("../../uploads/" . $row['image'])) : ?>
+                                <img src="../../uploads/<?= $row['image']; ?>" width="100" alt="Product Image">
+                            <?php else : ?>
+                                <span class="text-muted">No image</span>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= $row['created_at']; ?></td>
+                        <td>
+                            <a href="edit.php?id=<?= $row['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="delete.php?id=<?= $row['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<?php include '../require/footer.php'; ?> <!-- Corrected path to footer.php -->
+<?php include '../admin_template/footer.php'; ?>
 
-</body>
-</html>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
